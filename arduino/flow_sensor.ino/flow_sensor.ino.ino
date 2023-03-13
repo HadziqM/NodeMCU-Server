@@ -4,7 +4,7 @@
 
 const char* ssid = "CMCC-Kelapa 3";
 const char* password = "gakngerti";
-const char* serverName = "http://192.168.1.7:8080/valve1";
+const char* serverName = "http://192.168.1.7:8080/flow";
 
 WiFiClient client;
 HTTPClient http;
@@ -24,7 +24,7 @@ void Flow(){
 void send_post(double value){
   http.begin(client, serverName);
   String val = String(value,2);
-  String body = String("{\"mili\":\""+val+"\"}");
+  String body = String("{\"value\":\""+val+"\",\"device\":\"flow1\"}");
   http.addHeader("Content-Type", "application/json");
   int httpResponseCode = http.POST(body);
   Serial.print("HTTP Response code: ");
