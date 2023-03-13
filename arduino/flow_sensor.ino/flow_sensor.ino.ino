@@ -10,7 +10,7 @@ WiFiClient client;
 HTTPClient http;
 
 //interval of post request
-unsigned long interval = 3000;
+unsigned long interval = 5000;
 
 //flow sensor data
 int flowPin = 5; //GPIO05 D1
@@ -22,14 +22,16 @@ void Flow(){
 }
 
 void send_post(double value){
-  http.begin(client, serverName);
-  String val = String(value,2);
-  String body = String("{\"value\":\""+val+"\",\"device\":\"flow1\"}");
-  http.addHeader("Content-Type", "application/json");
-  int httpResponseCode = http.POST(body);
-  Serial.print("HTTP Response code: ");
-  Serial.println(httpResponseCode);
-  http.end();
+  if(WiFi.status()== WL_CONNECTED){
+    http.begin(client, serverName);
+    String val = String(value,2);
+    String body = String("{\"value\":\""+val+"\",\"device\":\"flow1\"}");
+    http.addHeader("Content-Type", "application/json");
+    int httpResponseCode = http.POST(body);
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    http.end();
+  }
 }
 void setup_wifi() {
   // connect wifi with blink indicator
@@ -68,10 +70,13 @@ void setup() {
 }
 
 void loop() {
-  count = 0;      // Reset the counter so we start counting from 0 again
+  if(WiFi.status()== WL_CONNECTED){
+    count = 0;      // Reset the counter if we could send request otherwise continue last value
+  }
   interrupts();   //Enables interrupts on the Arduino
   delay (interval);   //Wait interval
   noInterrupts(); //Disable the interrupts on the Arduino
   double value = (count * 1.68); //sensor spec 1.68mL per pulse
   send_post(value); //send post request
 }
+  

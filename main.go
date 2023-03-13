@@ -1,16 +1,38 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
+	"mcu-server/config"
 	"net/http"
+
+	_ "github.com/lib/pq"
 )
 
+var db *sql.DB
+var conf *config.Config
+
 func main() {
+	data, err := config.Load()
+	config.LogErr(err)
+	conf = &data
+	config.LogErr(connect())
 	http.HandleFunc("/", index)
 	http.HandleFunc("/flow", valve1)
 	log.Println("Server Started")
-	log.Fatal(http.ListenAndServe("192.168.1.7:8080", nil))
+	log.Fatal(http.ListenAndServe(conf.Host, nil))
+}
+
+func connect() error {
+	db, err := sql.Open("postgres", conf.DbUrl)
+	if err != nil {
+		return err
+	}
+	if err2 := db.Ping(); err2 != nil {
+		return err2
+	}
+	return nil
 }
 
 func index(w http.ResponseWriter, c *http.Request) {
@@ -35,6 +57,7 @@ func valve1(w http.ResponseWriter, c *http.Request) {
 			http.Error(w, "invalid body", 404)
 			return
 		}
+		db.Exec("insert into flow_one (mili) values ($1)", t.Val)
 		log.Println(t)
 	}
 }
