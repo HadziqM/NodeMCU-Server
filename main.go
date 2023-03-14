@@ -17,9 +17,11 @@ func main() {
 	data, err := config.Load()
 	config.LogErr(err)
 	conf = &data
-	config.LogErr(connect())
+	if conf.Use {
+		config.LogErr(connect())
+	}
 	http.HandleFunc("/", index)
-	http.HandleFunc("/flow", valve1)
+	http.HandleFunc("/flow", flow)
 	log.Println("Server Started")
 	log.Fatal(http.ListenAndServe(conf.Host, nil))
 }
@@ -42,22 +44,19 @@ func index(w http.ResponseWriter, c *http.Request) {
 	}
 }
 
-type valve struct {
-	Val    string `json:"value"`
-	Device string `json:"device"`
-}
-
-func valve1(w http.ResponseWriter, c *http.Request) {
+func flow(w http.ResponseWriter, c *http.Request) {
 	if c.Method == "POST" {
 		data := json.NewDecoder(c.Body)
-		var t valve
+		var t config.Sensor
 		err := data.Decode(&t)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, "invalid body", 404)
-			return
-		}
-		db.Exec("insert into flow_one (mili) values ($1)", t.Val)
+		config.LogIgnore(err)
 		log.Println(t)
+		if conf.Use {
+			if t.Device == "flow1" {
+				db.Exec("insert into flow_one (mili) values ($1)", t.Val)
+			} else {
+				db.Exec("insert into flow_two (mili) values ($1)", t.Val)
+			}
+		}
 	}
 }
