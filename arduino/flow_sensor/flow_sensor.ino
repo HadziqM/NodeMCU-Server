@@ -6,8 +6,6 @@ const char* ssid = "CMCC-Kelapa 3";
 const char* password = "gakngerti";
 const char* serverName = "http://192.168.1.7:8080/flow";
 
-bool connTest = false;
-
 WiFiClient client;
 HTTPClient http;
 
@@ -26,7 +24,8 @@ void Flow(){
 
 void send_post(double value){
   if(WiFi.status()== WL_CONNECTED){
-    count = 0;   
+    count = 0;
+    
     http.begin(client, serverName);
     String val = String(value,2);
     String body = String("{\"value\":\""+val+"\",\"device\":\"flow1\"}");
@@ -69,22 +68,14 @@ void setup() {
   Serial.begin(115200);
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   pinMode(flowPin, INPUT_PULLUP);   //set D1 (GPIO05) as input
-  if (connTest){
-    setup_wifi();
-  }
+  setup_wifi();
   attachInterrupt(digitalPinToInterrupt(flowPin), Flow, RISING);     // set interupt on flowpin 
 }
 
 void loop() {
-  if(milis()-timeState > interval){
+  if(millis()-timeState > interval){
     double value = (count * 1.68); //sensor spec 1.68mL per pulse
-    if (connTest){
-        send_post(value); //send post request
-    }else{
-        count = 0;
-        Serial.print("Flow Counted in interval (mL): ");
-        Serial.println(double);
-    }
-    timeState = milis();
+    send_post(value); //send post request
+    timeState = millis();
   }
 }
