@@ -1,5 +1,5 @@
 {
     "host":"192.168.1.7:8080",
-    "db_url":"postgres://pqgotest:password@localhost/pqgotest",
-    "db_use":false
+    "db_url":"postgres://postgres:Qwerty333@103.67.186.22/development",
+    "db_use":true
 }

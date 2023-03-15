@@ -6,7 +6,7 @@ const char* ssid = "CMCC-Kelapa 3";
 const char* password = "gakngerti";
 const char* serverName = "http://192.168.1.7:8080/flow";
 
-bool connTest = false;
+bool connTest = true;
 
 WiFiClient client;
 HTTPClient http;
@@ -20,7 +20,7 @@ int flowPin = 5; //GPIO05 D1
 volatile long count;
 
 //function called on interupt
-void Flow(){
+void ICACHE_RAM_ATTR Flow(){
   count++;
 }
 
@@ -66,9 +66,10 @@ void setup_wifi() {
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   pinMode(flowPin, INPUT_PULLUP);   //set D1 (GPIO05) as input
+  Serial.println("Ready");
   if (connTest){
     setup_wifi();
   }
