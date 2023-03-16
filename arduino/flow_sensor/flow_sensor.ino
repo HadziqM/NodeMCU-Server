@@ -24,11 +24,10 @@ void Flow(){
 
 void send_post(double value){
   if(WiFi.status()== WL_CONNECTED){
-    count = 0;
-    
+    String val = String(count);
+    count = 0;   
     http.begin(client, serverName);
-    String val = String(value,2);
-    String body = String("{\"value\":\""+val+"\",\"device\":\"flow1\"}");
+    String body = String("{\"value\":"+val+",\"device\":\"flow1\"}");
     http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST(body);
     Serial.print("HTTP Response code: ");
@@ -74,8 +73,7 @@ void setup() {
 
 void loop() {
   if(millis()-timeState > interval){
-    double value = (count * 1.68); //sensor spec 1.68mL per pulse
-    send_post(value); //send post request
+    send_post(); //send post request
     timeState = millis();
   }
 }

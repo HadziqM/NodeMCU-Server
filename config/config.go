@@ -10,16 +10,17 @@ type Config struct {
 	DbUrl string `json:"db_url"`
 	Host  string `json:"host"`
 	Use   bool   `json:"db_use"`
+	Spec  string `json:"spec"`
 }
 
 type Sensor struct {
-	Val    string `json:"value"`
+	Val    int32  `json:"value"`
 	Device string `json:"device"`
 }
 
 func Load() (Config, error) {
 	var config Config
-	file, err := os.ReadFile("./config.json")
+	file, err := os.ReadFile("./env.json")
 	if err != nil {
 		return config, err
 	}

@@ -6,7 +6,7 @@ import (
 	"log"
 	"mcu-server/config"
 	"net/http"
-  "strconv"
+	"strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -29,14 +29,14 @@ func main() {
 
 func connect() error {
 	conn, err := sql.Open("postgres", conf.DbUrl)
-  db = conn
+	db = conn
 	if err != nil {
 		return err
 	}
 	if err2 := db.Ping(); err2 != nil {
 		return err2
 	}
-  log.Println("database pool established")
+	log.Println("database pool established")
 	return nil
 }
 
@@ -54,15 +54,16 @@ func flow(w http.ResponseWriter, c *http.Request) {
 		err := data.Decode(&t)
 		config.LogIgnore(err)
 		log.Println(t)
-    float, err := strconv.ParseFloat(t.Val, 32)
-    config.LogErr(err)
+		float, err := strconv.ParseFloat(conf.Spec, 32)
+		config.LogErr(err)
+		value := float32(float) * float32(t.Val)
 		if conf.Use {
 			if t.Device == "flow1" {
-        _,err := db.Exec("insert into flow_sens (sens_id,flow) values (1,$1)", float)
-        config.LogErr(err)
+				_, err := db.Exec("insert into flow_sens (sens_id,flow) values (1,$1)", value)
+				config.LogErr(err)
 			} else {
-        _,err := db.Exec("insert into flow_sens (sens_id,flow) values (2,$1)", float)
-        config.LogErr(err)
+				_, err := db.Exec("insert into flow_sens (sens_id,flow) values (2,$1)", value)
+				config.LogErr(err)
 			}
 		}
 		w.WriteHeader(http.StatusOK)
