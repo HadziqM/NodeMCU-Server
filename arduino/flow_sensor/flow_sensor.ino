@@ -12,7 +12,7 @@ WiFiServer server(80);
 
 WiFiManager wifiManager;
 
-const char* serverName = "http://192.168.1.7:8080/flow";
+const char* serverName = "http://103.67.186.22:8080/flow";
 
 HTTPClient http;
 
@@ -21,7 +21,7 @@ unsigned long interval = 5000;
 volatile long timeState = 0;
 
 //flow sensor data
-int flowPin = 5; //GPIO05 D1
+int flowPin = 4; //GPIO05 D2
 volatile long count;
 
 //function called on interupt
