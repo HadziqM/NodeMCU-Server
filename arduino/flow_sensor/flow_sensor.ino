@@ -1,12 +1,19 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>
 
-const char* ssid = "CMCC-Kelapa 3";
-const char* password = "gakngerti";
+// Set web server port number to 80
+WiFiServer server(80);
+
+// Variable to store the HTTP request
+
+WiFiManager wifiManager;
+
 const char* serverName = "http://192.168.1.7:8080/flow";
 
-WiFiClient client;
 HTTPClient http;
 
 //interval of post request
@@ -18,12 +25,13 @@ int flowPin = 5; //GPIO05 D1
 volatile long count;
 
 //function called on interupt
-void Flow(){
+void ICACHE_RAM_ATTR Flow(){
   count++;
 }
 
-void send_post(double value){
+void send_post(){
   if(WiFi.status()== WL_CONNECTED){
+    WiFiClient client = server.available();
     String val = String(count);
     count = 0;   
     http.begin(client, serverName);
@@ -37,43 +45,26 @@ void send_post(double value){
 }
 void setup_wifi() {
   // connect wifi with blink indicator
-  digitalWrite(BUILTIN_LED, LOW);
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-  unsigned long status = 0; 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    if (status % 2 == 0){
-      digitalWrite(BUILTIN_LED, HIGH);
-    }else{
-      digitalWrite(BUILTIN_LED, LOW);
-    }
-    Serial.print(".");
-  }
-  randomSeed(micros());
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  //192.168.4.1:80
   digitalWrite(BUILTIN_LED, HIGH);
-  Serial.println(WiFi.localIP());
+  wifiManager.autoConnect("NodeMCU-Flow1");
 }
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  pinMode(flowPin, INPUT_PULLUP);   //set D1 (GPIO05) as input
+  pinMode(flowPin, INPUT_PULLUP);   //set D1 (GPIO05) as input  
   setup_wifi();
   attachInterrupt(digitalPinToInterrupt(flowPin), Flow, RISING);     // set interupt on flowpin 
 }
 
 void loop() {
   if(millis()-timeState > interval){
-    send_post(); //send post request
-    timeState = millis();
+    if(WiFi.status()== WL_CONNECTED){
+      digitalWrite(BUILTIN_LED, LOW);
+      send_post(); //send post request
+      timeState = millis();
+    }
   }
 }
